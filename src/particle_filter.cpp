@@ -57,11 +57,19 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	//   http://planning.cs.uiuc.edu/node99.html
 }
 
-void ParticleFilter::resample() {
+void ParticleFilter::resample() 
+{
 	// TODO: Resample particles with replacement with probability proportional to their weight. 
 	// NOTE: You may find std::discrete_distribution helpful here.
 	//   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
-
+	default_random_engine gen;
+  	discrete_distribution<int> distribution(weight.begin(), weight.end());
+  	vector<Particle> resample_particles;
+  	for (int i = 0; i < num_particles; i++)
+  	{
+  		resample_particles.push_back(particles[distribution(gen)]);
+  	}
+  	paritlices = resample_particles;
 }
 
 Particle ParticleFilter::SetAssociations(Particle& particle, const std::vector<int>& associations, 
