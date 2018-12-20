@@ -15,6 +15,7 @@
 #include <string>
 #include <iterator>
 
+//#include <cmath>
 #include "particle_filter.h"
 
 using namespace std;
@@ -84,16 +85,34 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 	}
 }
 
-void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {
+void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) 
+{
 	// TODO: Find the predicted measurement that is closest to each observed measurement and assign the 
 	//   observed measurement to this particular landmark.
 	// NOTE: this method will NOT be called by the grading code. But you will probably find it useful to 
 	//   implement this method and use it as a helper during the updateWeights phase.
+	int obs_index = 0;
+  	int pred_index = 0;
+  	double min_dist = 1000000.0;
+  	double dist = 1000000.0;
 
+  	for(obs_index = 0; obs_index<observations.size(); obs_index++)
+  	{
+  	  	for(pred_index = 0; pred_index<observations.size(); pred_index++)
+  	  	{
+  	  		dist = sqrt(pow((predicted[pred_index].x - observations[obs_index].x),2) + pow((predicted[pred_index].y - observations[obs_index].y),2));
+  	  		if(dist < min_dist)
+  	  		{
+  	  			min_dist = dist;
+  	  			observations[obs_index].id = predicted[pred_index].id;
+  	  		}
+  	  	}
+  	}
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
-		const std::vector<LandmarkObs> &observations, const Map &map_landmarks) {
+		const std::vector<LandmarkObs> &observations, const Map &map_landmarks) 
+{
 	// TODO: Update the weights of each particle using a mult-variate Gaussian distribution. You can read
 	//   more about this distribution here: https://en.wikipedia.org/wiki/Multivariate_normal_distribution
 	// NOTE: The observations are given in the VEHICLE'S coordinate system. Your particles are located
@@ -104,6 +123,26 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	//   and the following is a good resource for the actual equation to implement (look at equation 
 	//   3.33
 	//   http://planning.cs.uiuc.edu/node99.html
+/*
+	vector<int> associations;
+	vector<double> sense_x;
+	vector<double> sense_y;
+	
+	vector<LandmarkObs> trans_observations;
+	LandmarkObs obs;
+	
+	for(int i = 0; i < observations.size(); i++)
+	{
+		LandmarkObs trans_obs;
+		obs = observations[i];
+		
+		// perform the space transformation from vehicle to map
+		trans_obs.x = particles[p].x + (obs.x * cos(particles[p].theta) - obs.y * sin(particles[p].theta));
+		trans_obs.y = particles[p].y + (obs.x * sin(particles[p].theta) + obs.y * cos(particles[p].theta));
+		trans_observations.push_back(trans_obs);
+	}
+	particles[p].weight = 1.0;
+    */
 }
 
 void ParticleFilter::resample() 
