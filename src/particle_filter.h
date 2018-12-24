@@ -11,8 +11,8 @@
 
 #include "helper_functions.h"
 
-struct Particle {
-
+struct Particle 
+{
 	int id;
 	double x;
 	double y;
@@ -23,15 +23,11 @@ struct Particle {
 	std::vector<double> sense_y;
 };
 
-
-
-class ParticleFilter {
-	
+class ParticleFilter 
+{
 	// Number of particles to draw
 	int num_particles; 
-	
-	
-	
+
 	// Flag, if filter is initialized
 	bool is_initialized;
 	
@@ -101,7 +97,7 @@ public:
 	 * Set a particles list of associations, along with the associations calculated world x,y coordinates
 	 * This can be a very useful debugging tool to make sure transformations are correct and assocations correctly connected
 	 */
-	Particle SetAssociations(Particle& particle, const std::vector<int>& associations,
+	void SetAssociations(Particle& particle, const std::vector<int>& associations,
 		                     const std::vector<double>& sense_x, const std::vector<double>& sense_y);
 
 	
@@ -112,7 +108,8 @@ public:
 	/**
 	* initialized Returns whether particle filter is initialized yet or not.
 	*/
-	const bool initialized() const {
+	const bool initialized() const 
+    {
 		return is_initialized;
 	}
 };
