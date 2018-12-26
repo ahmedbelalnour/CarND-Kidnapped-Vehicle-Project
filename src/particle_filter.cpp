@@ -97,6 +97,7 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
 
   	for(obs_index = 0; obs_index<observations.size(); obs_index++)
   	{
+      	min_dist = 1000000.0;
   	  	for(pred_index = 0; pred_index<observations.size(); pred_index++)
   	  	{
   	  		dist = sqrt(pow((predicted[pred_index].x - observations[obs_index].x),2) + pow((predicted[pred_index].y - observations[obs_index].y),2));
@@ -134,17 +135,18 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], c
   
     // Find landmarks in particle's range.
     vector<LandmarkObs> in_range_landmarks;
+    LandmarkObs in_range_landmark;
     for(unsigned int index = 0; index < map_landmarks.landmark_list.size(); index++) 
     {
-      float landmark_x = map_landmarks.landmark_list[index].x_f;
-      float landmark_y = map_landmarks.landmark_list[index].y_f;
-      int landmark_id = map_landmarks.landmark_list[index].id_i;
-      double dx = particle_x - landmark_x;
-      double dy = particle_y - landmark_y;
+      in_range_landmark.x = map_landmarks.landmark_list[index].x_f;
+      in_range_landmark.y = map_landmarks.landmark_list[index].y_f;
+      in_range_landmark.id = map_landmarks.landmark_list[index].id_i;
+      double dx = particle_x - in_range_landmark.x;
+      double dy = particle_y - in_range_landmark.y;
       double distance = sqrt(dx * dx + dy * dy);
       if ( distance <= sensor_range ) 
       {
-        in_range_landmarks.push_back(LandmarkObs{ landmark_id, landmark_x, landmark_y });
+        in_range_landmarks.push_back(in_range_landmark);
       }
     }
 
@@ -167,29 +169,30 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], c
     particles[p_index].weight = 1.0;
 
     // Calculate weights.
+    LandmarkObs trans_observation;
+    LandmarkObs landmark;
     for(unsigned int trans_obs_indx = 0; trans_obs_indx < trans_observations.size(); trans_obs_indx++) 
     {
-      double obs_x = trans_observations[trans_obs_indx].x;
-      double obs_y = trans_observations[trans_obs_indx].y;
-      int obs_id = trans_observations[trans_obs_indx].id;
+      trans_observation.x = trans_observations[trans_obs_indx].x;
+      trans_observation.y = trans_observations[trans_obs_indx].y;
+      trans_observation.id = trans_observations[trans_obs_indx].id;
 
-      double landmark_x, landmark_y;
       unsigned int k = 0;
       bool found = false;
       while( !found && k < in_range_landmarks.size() ) 
       {
-        if ( in_range_landmarks[k].id == obs_id) 
+        if ( in_range_landmarks[k].id == trans_observation.id) 
         {
           found = true;
-          landmark_x = in_range_landmarks[k].x;
-          landmark_y = in_range_landmarks[k].y;
+          landmark.x = in_range_landmarks[k].x;
+          landmark.y = in_range_landmarks[k].y;
         }
         k++;
       }
 
       // Calculating weight.
-      double dX = obs_x - landmark_x;
-      double dY = obs_y - landmark_y;
+      double dX = trans_observation.x - landmark.x;
+      double dY = trans_observation.y - landmark.y;
       double const_1= ( 1/(2*M_PI*std_landmark_range*std_landmark_bearing));
       double const_2 =  -( dX*dX/(2*std_landmark_range*std_landmark_range) + (dY*dY/(2*std_landmark_bearing*std_landmark_bearing)) );
       double weight = const_1 * exp(const_2);
